@@ -1,0 +1,2 @@
+pip install pdfminer.six requests
+python build_works_json.py
