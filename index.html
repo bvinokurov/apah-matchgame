@@ -236,7 +236,7 @@ function toggleReveal(){
 }
 
 async function loadWorks(){
-  const r = await fetch("./works.json");
+  const r = await fetch("./json.txt");
   const data = await r.json();
 
   // Normalize, add internal id
