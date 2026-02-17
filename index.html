@@ -3,341 +3,273 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AP Art History — Match Game</title>
+  <title>AP Art History — Multiple Choice Game</title>
   <style>
-    :root{
-      --bg:#ffffff; --fg:#111827; --muted:#6b7280; --border:#e5e7eb;
-      --chip:#f3f4f6; --good:#16a34a; --bad:#dc2626; --shadow: 0 1px 10px rgba(17,24,39,.06);
-    }
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
-    header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border);z-index:10;}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px;}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-    .brand{font-weight:800;letter-spacing:.2px;}
-    button{border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;}
-    button.primary{background:#111827;color:#fff;border-color:#111827;}
-    button:disabled{opacity:.6;cursor:not-allowed;}
-    .pill{font-size:12px;background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;color:#374151;}
-    main{padding:18px 0 44px;}
-    .hero{border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow);background:linear-gradient(180deg,#fff,#fafafa);}
-    .hero h1{margin:0;font-size:22px;}
+    :root{--bg:#fff;--fg:#111827;--muted:#6b7280;--border:#e5e7eb;--chip:#f3f4f6;--good:#16a34a;--bad:#dc2626;--shadow:0 1px 10px rgba(17,24,39,.06)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border);z-index:10}
+    .wrap{max-width:1000px;margin:0 auto;padding:14px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .brand{font-weight:800}
+    select,input,button{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:#fff}
+    button.primary{background:#111827;color:#fff;border-color:#111827;cursor:pointer}
+    button{cursor:pointer}
+    main{padding:16px 0 44px}
+    .pill{font-size:12px;background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;color:#374151}
+    .hero{border:1px solid var(--border);border-radius:18px;padding:14px;background:linear-gradient(180deg,#fff,#fafafa);box-shadow:var(--shadow)}
+    .hero h1{margin:0;font-size:18px}
     .hero p{margin:8px 0 0;color:var(--muted);line-height:1.35}
-    .layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
-    @media (max-width:900px){.layout{grid-template-columns:1fr;}}
-    .panel{border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:var(--shadow);overflow:hidden;}
-    .panel h2{margin:0;padding:12px 14px;border-bottom:1px solid var(--border);font-size:14px;color:#374151;background:#fcfcfc;}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px;}
-    @media (max-width:520px){.grid{grid-template-columns:1fr;}}
-    .imgcard{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;cursor:pointer;transition:transform .06s ease;}
-    .imgcard:active{transform:scale(.99);}
-    .thumb{aspect-ratio:4/3;background:var(--chip);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-    .cap{padding:10px 10px 12px;}
-    .cap .small{color:var(--muted);font-size:12px;line-height:1.25}
-    .selected{outline:3px solid #111827;outline-offset:-3px;}
-    .matched{border-color:rgba(22,163,74,.35);box-shadow:0 0 0 3px rgba(22,163,74,.14) inset;}
-    .titles{display:flex;flex-direction:column;gap:10px;padding:14px;}
-    .tbtn{width:100%;text-align:left;border:1px solid var(--border);border-radius:14px;padding:10px 12px;background:#fff;cursor:pointer;}
-    .tbtn .t{font-weight:650;}
-    .tbtn .m{color:var(--muted);font-size:12px;margin-top:4px;}
-    .tbtn.matched{border-color:rgba(22,163,74,.35);background:#f0fdf4;}
-    .tbtn.wrong{border-color:rgba(220,38,38,.35);background:#fef2f2;}
-    .status{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;}
-    .msg{font-size:13px;color:#374151;}
-    .msg.good{color:var(--good);}
-    .msg.bad{color:var(--bad);}
-    .footer{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.35}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:var(--chip);border:1px solid var(--border);padding:2px 6px;border-radius:8px;font-size:12px;}
+    .game{display:grid;grid-template-columns:1fr 360px;gap:14px;margin-top:14px;align-items:start}
+    @media(max-width:900px){.game{grid-template-columns:1fr}}
+    .card{border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+    .thumb{aspect-ratio:16/10;background:var(--chip);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .pad{padding:14px}
+    .muted{color:var(--muted)}
+    .opts{display:flex;flex-direction:column;gap:10px}
+    .opt{width:100%;text-align:left;border:1px solid var(--border);border-radius:14px;padding:10px 12px;background:#fff}
+    .opt .t{font-weight:650}
+    .opt .m{color:var(--muted);font-size:12px;margin-top:4px}
+    .opt.correct{border-color:rgba(22,163,74,.35);background:#f0fdf4}
+    .opt.wrong{border-color:rgba(220,38,38,.35);background:#fef2f2}
+    .bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+    .msg{font-size:13px}
+    .msg.good{color:var(--good)}
+    .msg.bad{color:var(--bad)}
+    .small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="row">
-      <div class="brand">AP Art History — Match Game</div>
-      <span class="pill" id="roundInfo">Round: —</span>
-      <span class="pill" id="scoreInfo">Score: 0</span>
-      <span class="pill" id="streakInfo">Streak: 0</span>
-      <button class="primary" id="newRoundBtn">New Round</button>
-      <button id="revealBtn">Reveal Answers</button>
+      <div class="brand">AP Art History — Multiple Choice</div>
+      <span class="pill" id="hud">Loading…</span>
+
+      <select id="unitSel" title="Filter by unit">
+        <option value="all">All units</option>
+      </select>
+
+      <button class="primary" id="newBtn">New Question</button>
+      <button id="revealBtn">Reveal</button>
+
+      <input id="search" placeholder="Search title (optional)" />
     </div>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="hero">
-    <h1>Match the image to the correct title</h1>
-    <p>
-      Click an image on the left, then click a title on the right.
-      Thumbnails load automatically (Wikipedia).
-      Best on desktop, works on phones too.
-    </p>
-    <div class="status">
-      <div class="msg" id="msg">Loading…</div>
-      <div class="pill">Tip: press <span class="kbd">New Round</span> to shuffle.</div>
-    </div>
-    <div class="footer">
-      If a thumbnail fails, Wikipedia didn’t return an image for that entry—swap the <span class="kbd">wiki</span> title in the dataset.
-    </div>
-  </div>
-
-  <div class="layout">
-    <section class="panel">
-      <h2>Images</h2>
-      <div class="grid" id="imageGrid"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Titles</h2>
-      <div class="titles" id="titleList"></div>
-    </section>
-  </div>
-</main>
+<main class="wrap" id="app"></main>
 
 <script>
-/**
- * DATASET
- * Each item needs a Wikipedia page title ("wiki") so we can auto-fetch a thumbnail.
- * You can add your full 250 later by copying this format.
- */
-const WORKS = [
-  // Unit 2 anchors
-  { unit: 2, title: "Palette of Narmer", wiki: "Narmer Palette", meta:"Predynastic Egypt • c. 3000 BCE" },
-  { unit: 2, title: "Seated Scribe", wiki: "Seated Scribe", meta:"Old Kingdom Egypt • c. 2500 BCE" },
-  { unit: 2, title: "Parthenon", wiki: "Parthenon", meta:"Classical Greece • 447–432 BCE" },
-  { unit: 2, title: "Pantheon", wiki: "Pantheon, Rome", meta:"Rome • 118–125 CE" },
-
-  // Unit 4 anchors
-  { unit: 4, title: "Mona Lisa", wiki: "Mona Lisa", meta:"Leonardo • c. 1503–1506" },
-  { unit: 4, title: "David", wiki: "David (Michelangelo)", meta:"Michelangelo • 1501–1504" },
-  { unit: 4, title: "Las Meninas", wiki: "Las Meninas", meta:"Velázquez • 1656" },
-  { unit: 4, title: "Girl with a Pearl Earring", wiki: "Girl with a Pearl Earring", meta:"Vermeer • c. 1665" },
-
-  // Global anchors
-  { unit: 8, title: "Great Wave off Kanagawa", wiki: "The Great Wave off Kanagawa", meta:"Hokusai • 1830–1833" },
-  { unit: 8, title: "Terracotta Army", wiki: "Terracotta Army", meta:"Qin China • c. 210 BCE" },
-  { unit: 5, title: "Machu Picchu", wiki: "Machu Picchu", meta:"Inca • c. 1450" },
-  { unit: 7, title: "Taj Mahal", wiki: "Taj Mahal", meta:"Mughal India • 1632–1653" },
-];
-
-/** Game settings */
-const ROUND_SIZE = 6; // choose 6 each round (good on phones)
 const WIKI_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+const CHOICES = 4;
 
-/** App state */
-let round = 0;
-let score = 0;
-let streak = 0;
+let WORKS = [];
+let unitFilter = "all";
+let query = "";
+let qNum = 0, score = 0, streak = 0;
 let revealMode = false;
 
-let currentSet = [];
-let selectedImageId = null; // index in currentSet
-let matched = new Set(); // matched indices
+let currentQ = null;          // { correctWork, choices[] }
+let answered = false;
 
-const elImageGrid = document.getElementById("imageGrid");
-const elTitleList  = document.getElementById("titleList");
-const elMsg        = document.getElementById("msg");
-const elRoundInfo  = document.getElementById("roundInfo");
-const elScoreInfo  = document.getElementById("scoreInfo");
-const elStreakInfo = document.getElementById("streakInfo");
-const btnNewRound  = document.getElementById("newRoundBtn");
-const btnReveal    = document.getElementById("revealBtn");
+const elApp = document.getElementById("app");
+const elHud = document.getElementById("hud");
+const elUnitSel = document.getElementById("unitSel");
+const elNewBtn = document.getElementById("newBtn");
+const elReveal = document.getElementById("revealBtn");
+const elSearch = document.getElementById("search");
 
-function setMsg(text, kind="") {
-  elMsg.className = "msg " + (kind || "");
-  elMsg.textContent = text;
-}
-function setHUD() {
-  elRoundInfo.textContent = `Round: ${round}`;
-  elScoreInfo.textContent = `Score: ${score}`;
-  elStreakInfo.textContent = `Streak: ${streak}`;
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function setHud(msg=""){
+  elHud.textContent = msg || `Q ${qNum} • Score ${score} • Streak ${streak} • Pool ${filteredWorks().length}`;
 }
 
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i=a.length-1;i>0;i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
+function filteredWorks(){
+  let pool = WORKS;
+  if(unitFilter !== "all") pool = pool.filter(w => String(w.unit) === String(unitFilter));
+  if(query.trim()) pool = pool.filter(w => (w.title||"").toLowerCase().includes(query.trim().toLowerCase()));
+  return pool;
 }
 
-function pickRoundWorks() {
-  const pool = shuffle(WORKS);
-  return pool.slice(0, Math.min(ROUND_SIZE, pool.length));
-}
-
-async function fetchThumb(wikiTitle) {
+async function fetchThumb(wikiTitle){
   const url = WIKI_SUMMARY + encodeURIComponent(wikiTitle);
-  const r = await fetch(url, { headers: { "accept": "application/json" } });
-  if (!r.ok) throw new Error("Wikipedia fetch failed");
+  const r = await fetch(url, { headers: { "accept":"application/json" }});
+  if(!r.ok) throw new Error("wiki fetch failed");
   const data = await r.json();
-  const thumb = data?.thumbnail?.source || "";
-  const extract = data?.extract || "";
-  return { thumb, extract, page: data?.content_urls?.desktop?.page || "" };
+  return data?.thumbnail?.source || "";
 }
 
-function clearSelections() {
-  selectedImageId = null;
-  document.querySelectorAll(".imgcard").forEach(c => c.classList.remove("selected"));
-  document.querySelectorAll(".tbtn").forEach(b => b.classList.remove("selected"));
+function ensureThumb(work, thumbFromWiki){
+  // Prefer wiki thumbnail, fall back to image_url if provided
+  return thumbFromWiki || work.image_url || "";
 }
 
-function allMatched() {
-  return matched.size === currentSet.length;
-}
+function renderQuestion(){
+  const w = currentQ.correctWork;
+  const imgSrc = w._thumb || "";
 
-function render() {
-  elImageGrid.innerHTML = "";
-  elTitleList.innerHTML = "";
-  matched = new Set();
-  selectedImageId = null;
+  elApp.innerHTML = `
+    <div class="hero">
+      <h1>What artwork is this?</h1>
+      <p>Choose 1 of ${CHOICES}. Use unit filter if you want targeted practice.</p>
+      <div class="bar">
+        <div class="msg" id="msg">Pick an answer.</div>
+        <div class="pill">Tip: “Reveal” shows the correct choice.</div>
+      </div>
+    </div>
 
-  // Build images (left)
-  currentSet.forEach((w, idx) => {
-    const card = document.createElement("div");
-    card.className = "imgcard";
-    card.dataset.idx = String(idx);
+    <div class="game">
+      <section class="card">
+        <div class="thumb" id="thumb">
+          ${imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(w.title)}">` : `<div class="small">No image found (fix wiki title or add image_url).</div>`}
+        </div>
+        <div class="pad">
+          <div class="small muted">${escapeHtml(w.meta || "")}</div>
+        </div>
+      </section>
 
-    const thumb = document.createElement("div");
-    thumb.className = "thumb";
-    thumb.innerHTML = w._thumb
-      ? `<img alt="${escapeHtml(w.title)}" src="${w._thumb}">`
-      : `<div class="cap"><div class="small">No thumbnail</div></div>`;
+      <section class="card">
+        <div class="pad">
+          <div class="opts" id="opts"></div>
+        </div>
+      </section>
+    </div>
+  `;
 
-    const cap = document.createElement("div");
-    cap.className = "cap";
-    cap.innerHTML = `<div class="small">${escapeHtml(w.meta || "")}</div>`;
+  const opts = document.getElementById("opts");
+  const msg = document.getElementById("msg");
 
-    card.appendChild(thumb);
-    card.appendChild(cap);
+  currentQ.choices.forEach(choice => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = `<div class="t">${escapeHtml(choice.title)}</div><div class="m">${escapeHtml(choice.meta || "")}</div>`;
+    b.onclick = () => {
+      if(answered && !revealMode) return;
 
-    card.addEventListener("click", () => onSelectImage(idx));
-    elImageGrid.appendChild(card);
+      answered = true;
+      const correct = (choice._id === w._id);
+
+      if(correct){
+        score += 10; streak += 1;
+        b.classList.add("correct");
+        msg.className = "msg good";
+        msg.textContent = "Correct ✅";
+      } else {
+        score = Math.max(0, score - 3); streak = 0;
+        b.classList.add("wrong");
+        msg.className = "msg bad";
+        msg.textContent = "Not quite — the correct answer is highlighted.";
+        // highlight correct button
+        [...opts.querySelectorAll(".opt")].forEach(btn=>{
+          if(btn.querySelector(".t")?.textContent === w.title) btn.classList.add("correct");
+        });
+      }
+      setHud();
+    };
+    opts.appendChild(b);
   });
-
-  // Build titles (right) — shuffled order
-  const shuffledTitles = shuffle(currentSet.map((w, idx) => ({ idx, title: w.title, meta: w.meta })));
-
-  shuffledTitles.forEach(item => {
-    const btn = document.createElement("button");
-    btn.className = "tbtn";
-    btn.dataset.idx = String(item.idx);
-    btn.innerHTML = `<div class="t">${escapeHtml(item.title)}</div><div class="m">${escapeHtml(item.meta || "")}</div>`;
-    btn.addEventListener("click", () => onPickTitle(item.idx, btn));
-    elTitleList.appendChild(btn);
-  });
-
-  setMsg("Pick an image, then pick a title.", "");
 }
 
-function onSelectImage(idx) {
-  if (revealMode) return;
-  if (matched.has(idx)) return;
-
-  selectedImageId = idx;
-  document.querySelectorAll(".imgcard").forEach(c => c.classList.remove("selected"));
-  const selected = document.querySelector(`.imgcard[data-idx="${idx}"]`);
-  selected?.classList.add("selected");
-  setMsg("Now choose the matching title on the right.", "");
-}
-
-function onPickTitle(titleIdx, btnEl) {
-  if (revealMode) return;
-  if (selectedImageId === null) {
-    setMsg("Pick an image first (left).", "bad");
+function makeQuestion(){
+  const pool = filteredWorks();
+  if(pool.length < CHOICES){
+    elApp.innerHTML = `<div class="hero"><h1>Not enough works</h1><p>Choose “All units” or clear search so there are at least ${CHOICES} items in the pool.</p></div>`;
+    setHud();
     return;
   }
-  if (matched.has(titleIdx)) return;
 
-  const correct = (titleIdx === selectedImageId);
-  const imgCard = document.querySelector(`.imgcard[data-idx="${selectedImageId}"]`);
-  const titleBtn = document.querySelector(`.tbtn[data-idx="${titleIdx}"]`);
+  // Pick correct
+  const correct = pool[Math.floor(Math.random() * pool.length)];
 
-  if (correct) {
-    matched.add(titleIdx);
-    score += 10;
-    streak += 1;
-    imgCard?.classList.add("matched");
-    titleBtn?.classList.add("matched");
-    setMsg("Correct ✅", "good");
-  } else {
-    score = Math.max(0, score - 3);
-    streak = 0;
-    titleBtn?.classList.add("wrong");
-    setMsg("Not quite — try again.", "bad");
-    // remove wrong highlight quickly
-    setTimeout(() => titleBtn?.classList.remove("wrong"), 550);
-  }
+  // Pick 3 decoys
+  const decoys = shuffle(pool.filter(w => w._id !== correct._id)).slice(0, CHOICES - 1);
 
-  setHUD();
-  clearSelections();
+  currentQ = {
+    correctWork: correct,
+    choices: shuffle([correct, ...decoys])
+  };
 
-  if (allMatched()) {
-    score += 15;
-    setHUD();
-    setMsg("Round complete 🎉 Click “New Round”.", "good");
-  }
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
-}
-
-async function startRound() {
+  answered = false;
   revealMode = false;
-  btnReveal.textContent = "Reveal Answers";
-  round += 1;
-  setHUD();
-  setMsg("Loading thumbnails…", "");
+  elReveal.textContent = "Reveal";
+}
 
-  currentSet = pickRoundWorks().map(w => ({ ...w, _thumb:"", _extract:"", _page:"" }));
+async function loadThumbForCorrect(){
+  const w = currentQ.correctWork;
+  try{
+    const t = await fetchThumb(w.wiki || w.title);
+    w._thumb = ensureThumb(w, t);
+  } catch {
+    w._thumb = ensureThumb(w, "");
+  }
+}
 
-  // Load thumbnails in parallel
-  await Promise.all(currentSet.map(async (w, i) => {
-    try {
-      const res = await fetchThumb(w.wiki);
-      currentSet[i]._thumb = res.thumb;
-      currentSet[i]._extract = res.extract;
-      currentSet[i]._page = res.page;
-    } catch (e) {
-      // leave thumbnail blank
-    }
+async function newQuestion(){
+  qNum += 1;
+  setHud("Loading image…");
+  makeQuestion();
+  await loadThumbForCorrect();
+  setHud();
+  renderQuestion();
+}
+
+function toggleReveal(){
+  revealMode = !revealMode;
+  elReveal.textContent = revealMode ? "Hide" : "Reveal";
+  if(!currentQ) return;
+
+  // Re-render and highlight correct when revealMode true
+  renderQuestion();
+
+  if(revealMode){
+    const opts = document.getElementById("opts");
+    [...opts.querySelectorAll(".opt")].forEach(btn=>{
+      if(btn.querySelector(".t")?.textContent === currentQ.correctWork.title) btn.classList.add("correct");
+    });
+    const msg = document.getElementById("msg");
+    msg.className = "msg";
+    msg.textContent = "Revealed. Click Hide to keep playing normally.";
+  }
+}
+
+async function loadWorks(){
+  const r = await fetch("./works.json");
+  const data = await r.json();
+
+  // Normalize, add internal id
+  WORKS = data.map((w, i) => ({
+    _id: w.id ?? i+1,
+    unit: w.unit ?? 0,
+    title: w.title ?? "",
+    wiki: w.wiki ?? w.title ?? "",
+    meta: w.meta ?? "",
+    image_url: w.image_url ?? ""
   }));
 
-  render();
+  // Populate units dropdown from existing units
+  const units = [...new Set(WORKS.map(w => w.unit))].filter(u => u !== 0).sort((a,b)=>a-b);
+  units.forEach(u=>{
+    const opt = document.createElement("option");
+    opt.value = String(u);
+    opt.textContent = `Unit ${u}`;
+    elUnitSel.appendChild(opt);
+  });
+
+  setHud();
 }
 
-function toggleReveal() {
-  revealMode = !revealMode;
+elNewBtn.onclick = newQuestion;
+elReveal.onclick = toggleReveal;
+elUnitSel.onchange = () => { unitFilter = elUnitSel.value; newQuestion(); };
+elSearch.oninput = () => { query = elSearch.value; newQuestion(); };
 
-  if (revealMode) {
-    // Show matches by marking all correct
-    currentSet.forEach((_, idx) => {
-      document.querySelector(`.imgcard[data-idx="${idx}"]`)?.classList.add("matched");
-      document.querySelector(`.tbtn[data-idx="${idx}"]`)?.classList.add("matched");
-    });
-    btnReveal.textContent = "Hide Answers";
-    setMsg("Answers revealed. Click “Hide Answers” to keep playing.", "");
-  } else {
-    // Reset visual states but keep round
-    btnReveal.textContent = "Reveal Answers";
-    document.querySelectorAll(".imgcard").forEach(c => c.classList.remove("matched","selected"));
-    document.querySelectorAll(".tbtn").forEach(b => b.classList.remove("matched","selected","wrong"));
-    matched = new Set();
-    selectedImageId = null;
-    setMsg("Back to play mode. Match image → title.", "");
-  }
-}
-
-btnNewRound.addEventListener("click", startRound);
-btnReveal.addEventListener("click", toggleReveal);
-
-// Start
-setHUD();
-startRound();
+(async ()=>{
+  await loadWorks();
+  await newQuestion();
+})();
 </script>
 </body>
 </html>
