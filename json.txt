@@ -1,2 +1,39 @@
-pip install pdfminer.six requests
-python build_works_json.py
+[
+  {
+    "unit": 4,
+    "title": "Mona Lisa",
+    "wiki": "Mona Lisa",
+    "meta": "Leonardo da Vinci • c. 1503–1506"
+  },
+  {
+    "unit": 4,
+    "title": "David",
+    "wiki": "David (Michelangelo)",
+    "meta": "Michelangelo • 1501–1504"
+  },
+  {
+    "unit": 4,
+    "title": "Sistine Chapel Ceiling",
+    "wiki": "Sistine Chapel ceiling",
+    "meta": "Michelangelo • 1508–1512"
+  },
+  {
+    "unit": 4,
+    "title": "School of Athens",
+    "wiki": "The School of Athens",
+    "meta": "Raphael • 1509–1511"
+  },
+  {
+    "unit": 2,
+    "title": "Parthenon",
+    "wiki": "Parthenon",
+    "meta": "Greece • 447–432 BCE"
+  },
+  {
+    "unit": 2,
+    "title": "Pantheon",
+    "wiki": "Pantheon, Rome",
+    "meta": "Rome • 118–125 CE"
+  }
+]
+
