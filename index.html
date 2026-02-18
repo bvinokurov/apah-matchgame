@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AP Art History — Multiple Choice Game</title>
+  <title>AP Art History — Study Game</title>
   <style>
     :root{--bg:#fff;--fg:#111827;--muted:#6b7280;--border:#e5e7eb;--chip:#f3f4f6;--good:#16a34a;--bad:#dc2626;--shadow:0 1px 10px rgba(17,24,39,.06)}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
@@ -43,7 +43,7 @@
 <header>
   <div class="wrap">
     <div class="row">
-      <div class="brand">AP Art History — Multiple Choice</div>
+      <div class="brand">AP Art History — Study Game</div>
       <span class="pill" id="hud">Loading…</span>
 
       <select id="unitSel" title="Filter by unit">
@@ -61,215 +61,218 @@
 <main class="wrap" id="app"></main>
 
 <script>
-const WIKI_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/";
-const CHOICES = 4;
+  const CHOICES = 4;
 
-let WORKS = [];
-let unitFilter = "all";
-let query = "";
-let qNum = 0, score = 0, streak = 0;
-let revealMode = false;
+  let WORKS = [];
+  let unitFilter = "all";
+  let query = "";
+  let qNum = 0, score = 0, streak = 0;
+  let revealMode = false;
 
-let currentQ = null;          // { correctWork, choices[] }
-let answered = false;
+  let currentQ = null;   // { correctWork, choices[] }
+  let answered = false;
 
-const elApp = document.getElementById("app");
-const elHud = document.getElementById("hud");
-const elUnitSel = document.getElementById("unitSel");
-const elNewBtn = document.getElementById("newBtn");
-const elReveal = document.getElementById("revealBtn");
-const elSearch = document.getElementById("search");
+  const elApp = document.getElementById("app");
+  const elHud = document.getElementById("hud");
+  const elUnitSel = document.getElementById("unitSel");
+  const elNewBtn = document.getElementById("newBtn");
+  const elReveal = document.getElementById("revealBtn");
+  const elSearch = document.getElementById("search");
 
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-function setHud(msg=""){
-  elHud.textContent = msg || `Q ${qNum} • Score ${score} • Streak ${streak} • Pool ${filteredWorks().length}`;
-}
+  function setHud(msg=""){
+    elHud.textContent = msg || `Q ${qNum} • Score ${score} • Streak ${streak} • Pool ${filteredWorks().length}`;
+  }
 
-function filteredWorks(){
-  let pool = WORKS;
-  if(unitFilter !== "all") pool = pool.filter(w => String(w.unit) === String(unitFilter));
-  if(query.trim()) pool = pool.filter(w => (w.title||"").toLowerCase().includes(query.trim().toLowerCase()));
-  return pool;
-}
+  function filteredWorks(){
+    let pool = WORKS;
+    if(unitFilter !== "all") pool = pool.filter(w => String(w.unit) === String(unitFilter));
+    if(query.trim()) pool = pool.filter(w => (w.title||"").toLowerCase().includes(query.trim().toLowerCase()));
+    return pool;
+  }
 
-async function fetchThumb(wikiTitle){
-  const url = WIKI_SUMMARY + encodeURIComponent(wikiTitle);
-  const r = await fetch(url, { headers: { "accept":"application/json" }});
-  if(!r.ok) throw new Error("wiki fetch failed");
-  const data = await r.json();
-  return data?.thumbnail?.source || "";
-}
+  // ✅ Reliable thumbnail fetch from Wikipedia for GitHub Pages (CORS-safe)
+  async function fetchThumb(wikiTitle){
+    const api =
+      "https://en.wikipedia.org/w/api.php" +
+      "?action=query" +
+      "&format=json" +
+      "&prop=pageimages" +
+      "&pithumbsize=900" +
+      "&titles=" + encodeURIComponent(wikiTitle) +
+      "&origin=*";
 
-function ensureThumb(work, thumbFromWiki){
-  // Prefer wiki thumbnail, fall back to image_url if provided
-  return thumbFromWiki || work.image_url || "";
-}
+    const r = await fetch(api);
+    if(!r.ok) throw new Error("wiki api failed");
+    const data = await r.json();
+    const pages = data?.query?.pages || {};
+    const firstKey = Object.keys(pages)[0];
+    return pages[firstKey]?.thumbnail?.source || "";
+  }
 
-function renderQuestion(){
-  const w = currentQ.correctWork;
-  const imgSrc = w._thumb || "";
+  function ensureThumb(work, fromWiki){
+    return fromWiki || work.image_url || "";
+  }
 
-  elApp.innerHTML = `
-    <div class="hero">
-      <h1>What artwork is this?</h1>
-      <p>Choose 1 of ${CHOICES}. Use unit filter if you want targeted practice.</p>
-      <div class="bar">
-        <div class="msg" id="msg">Pick an answer.</div>
-        <div class="pill">Tip: “Reveal” shows the correct choice.</div>
+  function renderQuestion(){
+    const w = currentQ.correctWork;
+    const imgSrc = w._thumb || "";
+
+    elApp.innerHTML = `
+      <div class="hero">
+        <h1>What artwork is this?</h1>
+        <p>Pick the correct title (4 choices). Use the unit filter for targeted practice.</p>
+        <div class="bar">
+          <div class="msg" id="msg">Pick an answer.</div>
+          <div class="pill">Reveal highlights the correct choice.</div>
+        </div>
       </div>
-    </div>
 
-    <div class="game">
-      <section class="card">
-        <div class="thumb" id="thumb">
-          ${imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(w.title)}">` : `<div class="small">No image found (fix wiki title or add image_url).</div>`}
-        </div>
-        <div class="pad">
-          <div class="small muted">${escapeHtml(w.meta || "")}</div>
-        </div>
-      </section>
+      <div class="game">
+        <section class="card">
+          <div class="thumb" id="thumb">
+            ${imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(w.title)}">` : `<div class="small">No image found. Fix "wiki" or add "image_url" in works.json.</div>`}
+          </div>
+          <div class="pad">
+            <div class="small muted">${escapeHtml(w.meta || "")}</div>
+          </div>
+        </section>
 
-      <section class="card">
-        <div class="pad">
-          <div class="opts" id="opts"></div>
-        </div>
-      </section>
-    </div>
-  `;
+        <section class="card">
+          <div class="pad">
+            <div class="opts" id="opts"></div>
+          </div>
+        </section>
+      </div>
+    `;
 
-  const opts = document.getElementById("opts");
-  const msg = document.getElementById("msg");
-
-  currentQ.choices.forEach(choice => {
-    const b = document.createElement("button");
-    b.className = "opt";
-    b.innerHTML = `<div class="t">${escapeHtml(choice.title)}</div><div class="m">${escapeHtml(choice.meta || "")}</div>`;
-    b.onclick = () => {
-      if(answered && !revealMode) return;
-
-      answered = true;
-      const correct = (choice._id === w._id);
-
-      if(correct){
-        score += 10; streak += 1;
-        b.classList.add("correct");
-        msg.className = "msg good";
-        msg.textContent = "Correct ✅";
-      } else {
-        score = Math.max(0, score - 3); streak = 0;
-        b.classList.add("wrong");
-        msg.className = "msg bad";
-        msg.textContent = "Not quite — the correct answer is highlighted.";
-        // highlight correct button
-        [...opts.querySelectorAll(".opt")].forEach(btn=>{
-          if(btn.querySelector(".t")?.textContent === w.title) btn.classList.add("correct");
-        });
-      }
-      setHud();
-    };
-    opts.appendChild(b);
-  });
-}
-
-function makeQuestion(){
-  const pool = filteredWorks();
-  if(pool.length < CHOICES){
-    elApp.innerHTML = `<div class="hero"><h1>Not enough works</h1><p>Choose “All units” or clear search so there are at least ${CHOICES} items in the pool.</p></div>`;
-    setHud();
-    return;
-  }
-
-  // Pick correct
-  const correct = pool[Math.floor(Math.random() * pool.length)];
-
-  // Pick 3 decoys
-  const decoys = shuffle(pool.filter(w => w._id !== correct._id)).slice(0, CHOICES - 1);
-
-  currentQ = {
-    correctWork: correct,
-    choices: shuffle([correct, ...decoys])
-  };
-
-  answered = false;
-  revealMode = false;
-  elReveal.textContent = "Reveal";
-}
-
-async function loadThumbForCorrect(){
-  const w = currentQ.correctWork;
-  try{
-    const t = await fetchThumb(w.wiki || w.title);
-    w._thumb = ensureThumb(w, t);
-  } catch {
-    w._thumb = ensureThumb(w, "");
-  }
-}
-
-async function newQuestion(){
-  qNum += 1;
-  setHud("Loading image…");
-  makeQuestion();
-  await loadThumbForCorrect();
-  setHud();
-  renderQuestion();
-}
-
-function toggleReveal(){
-  revealMode = !revealMode;
-  elReveal.textContent = revealMode ? "Hide" : "Reveal";
-  if(!currentQ) return;
-
-  // Re-render and highlight correct when revealMode true
-  renderQuestion();
-
-  if(revealMode){
     const opts = document.getElementById("opts");
-    [...opts.querySelectorAll(".opt")].forEach(btn=>{
-      if(btn.querySelector(".t")?.textContent === currentQ.correctWork.title) btn.classList.add("correct");
-    });
     const msg = document.getElementById("msg");
-    msg.className = "msg";
-    msg.textContent = "Revealed. Click Hide to keep playing normally.";
+
+    currentQ.choices.forEach(choice => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.innerHTML = `<div class="t">${escapeHtml(choice.title)}</div><div class="m">${escapeHtml(choice.meta || "")}</div>`;
+      b.onclick = () => {
+        if(answered && !revealMode) return;
+
+        answered = true;
+        const correct = (choice._id === w._id);
+
+        if(correct){
+          score += 10; streak += 1;
+          b.classList.add("correct");
+          msg.className = "msg good";
+          msg.textContent = "Correct ✅";
+        } else {
+          score = Math.max(0, score - 3); streak = 0;
+          b.classList.add("wrong");
+          msg.className = "msg bad";
+          msg.textContent = "Not quite — correct answer highlighted.";
+          [...opts.querySelectorAll(".opt")].forEach(btn=>{
+            if(btn.querySelector(".t")?.textContent === w.title) btn.classList.add("correct");
+          });
+        }
+        setHud();
+      };
+      opts.appendChild(b);
+    });
+
+    if(revealMode){
+      [...opts.querySelectorAll(".opt")].forEach(btn=>{
+        if(btn.querySelector(".t")?.textContent === w.title) btn.classList.add("correct");
+      });
+      msg.className = "msg";
+      msg.textContent = "Revealed. Click Reveal again to hide.";
+    }
   }
-}
 
-async function loadWorks(){
-  const r = await fetch("./json.txt");
-  const data = await r.json();
+  function makeQuestion(){
+    const pool = filteredWorks();
+    if(pool.length < CHOICES){
+      elApp.innerHTML = `<div class="hero"><h1>Not enough works</h1><p>Choose “All units” or clear search. You need at least ${CHOICES} works in works.json.</p></div>`;
+      setHud();
+      return false;
+    }
 
-  // Normalize, add internal id
-  WORKS = data.map((w, i) => ({
-    _id: w.id ?? i+1,
-    unit: w.unit ?? 0,
-    title: w.title ?? "",
-    wiki: w.wiki ?? w.title ?? "",
-    meta: w.meta ?? "",
-    image_url: w.image_url ?? ""
-  }));
+    const correct = pool[Math.floor(Math.random() * pool.length)];
+    const decoys = shuffle(pool.filter(w => w._id !== correct._id)).slice(0, CHOICES - 1);
 
-  // Populate units dropdown from existing units
-  const units = [...new Set(WORKS.map(w => w.unit))].filter(u => u !== 0).sort((a,b)=>a-b);
-  units.forEach(u=>{
-    const opt = document.createElement("option");
-    opt.value = String(u);
-    opt.textContent = `Unit ${u}`;
-    elUnitSel.appendChild(opt);
-  });
+    currentQ = { correctWork: correct, choices: shuffle([correct, ...decoys]) };
+    answered = false;
+    revealMode = false;
+    elReveal.textContent = "Reveal";
+    return true;
+  }
 
-  setHud();
-}
+  async function loadThumbForCorrect(){
+    const w = currentQ.correctWork;
+    try{
+      const t = await fetchThumb(w.wiki || w.title);
+      w._thumb = ensureThumb(w, t);
+    }catch{
+      w._thumb = ensureThumb(w, "");
+    }
+  }
 
-elNewBtn.onclick = newQuestion;
-elReveal.onclick = toggleReveal;
-elUnitSel.onchange = () => { unitFilter = elUnitSel.value; newQuestion(); };
-elSearch.oninput = () => { query = elSearch.value; newQuestion(); };
+  async function newQuestion(){
+    qNum += 1;
+    setHud("Loading image…");
+    const ok = makeQuestion();
+    if(!ok) return;
+    await loadThumbForCorrect();
+    setHud();
+    renderQuestion();
+  }
 
-(async ()=>{
-  await loadWorks();
-  await newQuestion();
-})();
+  function toggleReveal(){
+    revealMode = !revealMode;
+    elReveal.textContent = revealMode ? "Hide" : "Reveal";
+    if(!currentQ) return;
+    renderQuestion();
+  }
+
+  async function loadWorks(){
+    const r = await fetch("./works.json");
+    if(!r.ok) throw new Error("Could not load works.json");
+    const data = await r.json();
+
+    WORKS = data.map((w, i) => ({
+      _id: w.id ?? (i+1),
+      unit: w.unit ?? 0,
+      title: w.title ?? "",
+      wiki: w.wiki ?? w.title ?? "",
+      meta: w.meta ?? "",
+      image_url: w.image_url ?? ""
+    }));
+
+    const units = [...new Set(WORKS.map(w => w.unit))].filter(u => u !== 0).sort((a,b)=>a-b);
+    units.forEach(u=>{
+      const opt = document.createElement("option");
+      opt.value = String(u);
+      opt.textContent = `Unit ${u}`;
+      elUnitSel.appendChild(opt);
+    });
+    setHud();
+  }
+
+  elNewBtn.onclick = newQuestion;
+  elReveal.onclick = toggleReveal;
+  elUnitSel.onchange = () => { unitFilter = elUnitSel.value; newQuestion(); };
+  elSearch.oninput = () => { query = elSearch.value; newQuestion(); };
+
+  (async ()=>{
+    try{
+      await loadWorks();
+      await newQuestion();
+    }catch(e){
+      elApp.innerHTML = `<div class="hero"><h1>Setup error</h1><p class="muted">${escapeHtml(e.message)}</p>
+      <p class="muted">Make sure <b>works.json</b> is in the same folder/repo root as <b>index.html</b>.</p></div>`;
+      setHud("Error");
+    }
+  })();
 </script>
 </body>
 </html>
