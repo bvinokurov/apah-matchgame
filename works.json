@@ -1,9 +1,20 @@
+[
+  { "id": 1, "unit": 2, "title": "Palette of Narmer", "wiki": "Narmer Palette", "meta": "Predynastic Egypt • c. 3000 BCE" },
+  { "id": 2, "unit": 2, "title": "Seated Scribe", "wiki": "Seated Scribe", "meta": "Old Kingdom Egypt • c. 2500 BCE" },
+  { "id": 3, "unit": 2, "title": "Code of Hammurabi", "wiki": "Code of Hammurabi", "meta": "Babylonian • c. 1792–1750 BCE" },
+  { "id": 4, "unit": 2, "title": "Lamassu", "wiki": "Lamassu", "meta": "Assyrian • c. 720–705 BCE" },
+  { "id": 5, "unit": 2, "title": "Parthenon", "wiki": "Parthenon", "meta": "Classical Greece • 447–432 BCE" },
+  { "id": 6, "unit": 2, "title": "Pantheon", "wiki": "Pantheon, Rome", "meta": "Rome • 118–125 CE" },
 
-{
-  "unit": 8,
-  "title": "The Great Wave off Kanagawa",
-  "wiki": "The Great Wave off Kanagawa",
-  "meta": "Hokusai • 1830–1833",
-  "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Great_Wave_off_Kanagawa2.jpg"
-}
+  { "id": 7, "unit": 4, "title": "Mona Lisa", "wiki": "Mona Lisa", "meta": "Leonardo da Vinci • c. 1503–1506" },
+  { "id": 8, "unit": 4, "title": "David", "wiki": "David (Michelangelo)", "meta": "Michelangelo • 1501–1504" },
+  { "id": 9, "unit": 4, "title": "Sistine Chapel ceiling", "wiki": "Sistine Chapel ceiling", "meta": "Michelangelo • 1508–1512" },
+  { "id": 10, "unit": 4, "title": "The School of Athens", "wiki": "The School of Athens", "meta": "Raphael • 1509–1511" },
+  { "id": 11, "unit": 4, "title": "Las Meninas", "wiki": "Las Meninas", "meta": "Diego Velázquez • 1656" },
+  { "id": 12, "unit": 4, "title": "Girl with a Pearl Earring", "wiki": "Girl with a Pearl Earring", "meta": "Johannes Vermeer • c. 1665" },
 
+  { "id": 13, "unit": 5, "title": "Machu Picchu", "wiki": "Machu Picchu", "meta": "Inca • c. 1450" },
+  { "id": 14, "unit": 7, "title": "Taj Mahal", "wiki": "Taj Mahal", "meta": "Mughal India • 1632–1653" },
+  { "id": 15, "unit": 8, "title": "Terracotta Army", "wiki": "Terracotta Army", "meta": "Qin dynasty • c. 210 BCE" },
+  { "id": 16, "unit": 8, "title": "The Great Wave off Kanagawa", "wiki": "The Great Wave off Kanagawa", "meta": "Hokusai • 1830–1833" }
+]
